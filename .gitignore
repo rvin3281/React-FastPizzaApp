@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+src/prettier.config.cjs
+*.eslintrc.cjs
+*.eslintrc.json

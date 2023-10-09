@@ -1,9 +1,9 @@
 import { useSelector } from "react-redux";
-import store from "../../store";
+
 import { Form, redirect, useActionData, useNavigation } from "react-router-dom";
 import { createOrder } from "../../services/apiRestaurant";
 import Button from "../../ui/Button";
-import { clearCart, getCart } from "../cart/CartSlice";
+import { getCart } from "../cart/CartSlice";
 
 // https://uibakery.io/regex-library/phone-number
 const isValidPhone = (str) =>
@@ -36,8 +36,6 @@ const fakeCart = [
 ];
 
 function CreateOrder() {
-  const cart = useSelector(getCart);
-
   const username = useSelector((state) => state.user.username);
 
   const navigation = useNavigation();
@@ -129,31 +127,26 @@ export async function action({ request }) {
   const data = Object.fromEntries(formData);
   // console.log(data);
 
-  /** GET THE SUBMITTED DATA */
-  const submission = {
+  // Before Submitting the Form, WE need to convert JSON string to normal Javascript Object
+  const order = {
     ...data,
     cart: JSON.parse(data.cart),
-    priority: data.priority === "true",
+    priority: data.priority === "on", // Convert to boolean, if priority is 0 Then store as true
   };
 
-  // console.log(submission);
+  // console.log(order);
 
-  /** FORM VALIDATION PROCESS */
   const errors = {};
-
-  if (!isValidPhone(submission.phone))
-    errors.phone = "Please provide correct phone number";
+  if (!isValidPhone(order.phone))
+    errors.phone = "Please give is correct phone number";
 
   if (Object.keys(errors).length > 0) return errors;
 
-  /** SEND POST REQUEST */
+  // On the POST API, we can convert the normal JAVASCRIPT to JSON.stringify to store into the API server
+  // If everything is okay, create new order and redirect
 
-  const newOrder = await createOrder(submission);
+  const newOrder = await createOrder(order);
 
-  // Do NOT overuse
-  store.dispatch(clearCart());
-
-  /** REDIRECT TO SPECIFIC PAGE */
   return redirect(`/order/${newOrder.id}`);
 }
 
